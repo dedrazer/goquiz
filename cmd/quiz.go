@@ -58,51 +58,20 @@ var quizCmd = &cobra.Command{
 	Short: "Generate a Quiz",
 	Long:  `Generate a CLI quiz and collect the user's score.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// get a quiz from API
 		quiz := getQuiz(getQuizBytes())
 
-		scoresBytes, err := ioutil.ReadFile(fileName)
-
-		if err != nil {
-			fmt.Printf("Could not open scores file - %v", err)
-			os.Exit(1)
-		}
-
-		scoresString := string(scoresBytes)
-		scoresStrings := strings.Split(scoresString, ",")
-
-		scores := make([]int, len(scoresStrings))
+		// load previous scores
+		scores, fileContent := getAscendingScoresFromFile(fileName)
 
 		// start the quiz
 		score := doQuiz(quiz)
 
-		pos := -1
-		for i, s := range scoresStrings {
-			scores[i], _ = strconv.Atoi(s)
-			if pos == -1 && scores[i] >= score {
-				pos = i
-			}
-		}
+		// place the user
+		placeUser(score, scores)
 
-		// user placed last
-		if pos == -1 {
-			pos = 0
-		}
-
-		scores = append(scores, score)
-
-		//fmt.Printf("You placed in position %v, out of %v\n", pos, len(scores))
-		percentile := (float64(pos) / float64(len(scores))) * 100
-
-		// round down to the nearest 5
-		percentile = percentile - (math.Mod(percentile, 5))
-
-		if percentile < 100 {
-			percentile += 5
-		}
-
-		fmt.Printf("You placed in the top %v%%", percentile)
-
-		ioutil.WriteFile(fileName, []byte(scoresString+","+strconv.Itoa(score)), 0666)
+		// save the result
+		saveResult(fileContent, score)
 	},
 }
 
@@ -224,5 +193,62 @@ func doQuiz(questions []Question) int {
 	}
 
 	return score
-	//fmt.Printf("You got %v/%v %v%% correct", score, len(questions), (float64(score)/float64(len(questions)))*100)
+}
+
+func getAscendingScoresFromFile(fileName string) ([]int, string) {
+	scoresBytes, err := ioutil.ReadFile(fileName)
+
+	if err != nil {
+		fmt.Printf("Could not open scores file - %v", err)
+		os.Exit(1)
+	}
+
+	scoresString := string(scoresBytes)
+	scoresStrings := strings.Split(scoresString, ",")
+
+	scores := make([]int, len(scoresStrings))
+	// convert scores to numeric
+	for i, s := range scoresStrings {
+		scores[i], err = strconv.Atoi(strings.Trim(s, " "))
+
+		if err != nil {
+			fmt.Printf("Could not convert score string to int - ", err)
+		}
+	}
+
+	return sort.IntSlice(scores), scoresString
+}
+
+func placeUser(score int, scores []int) {
+	pos := -1
+	for i, s := range scores {
+		if pos == -1 && s >= score {
+			pos = i
+		}
+	}
+
+	// user placed last
+	if pos == -1 {
+		pos = 0
+	}
+
+	scores = append(scores, score)
+
+	percentile := (float64(pos) / float64(len(scores))) * 100
+
+	// round down to the nearest 5
+	percentile = percentile - (math.Mod(percentile, 5))
+
+	if percentile < 100 {
+		percentile += 5
+	}
+
+	fmt.Printf("You placed in the top %v%%", percentile)
+}
+
+func saveResult(fileContent string, score int) {
+	err := ioutil.WriteFile(fileName, []byte(fileContent+","+strconv.Itoa(score)), 0666)
+	if err != nil {
+		fmt.Printf("Could not save score - %v", err)
+	}
 }
