@@ -226,12 +226,14 @@ func getAscendingScoresFromFile(fileName string) ([]int, string) {
 		}
 	}
 
-	return sort.IntSlice(scores), scoresString
+	sort.Ints(scores)
+
+	return scores, scoresString
 }
 
-func placeUser(score int, scores []int) {
+func placeUser(score int, ascendingScores []int) {
 	pos := -1
-	for i, s := range scores {
+	for i, s := range ascendingScores {
 		if pos == -1 && s >= score {
 			pos = i
 		}
@@ -243,7 +245,7 @@ func placeUser(score int, scores []int) {
 	}
 
 	// position + 1 due to 0-based index
-	percentile := (float64(pos+1) / float64(len(scores))) * 100
+	percentile := 100 - (float64(pos+1)/float64(len(ascendingScores)))*100
 
 	// round down to the nearest 5
 	percentile = percentile - (math.Mod(percentile, 5))
