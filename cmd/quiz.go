@@ -61,6 +61,12 @@ var quizCmd = &cobra.Command{
 		// get a quiz from API
 		quiz := getQuiz(getQuizBytes())
 
+		for hasMultipleAnswers(quiz) {
+			// if quiz has multiple answers get another
+			// (the vast majority of questions have only 1 answer)
+			quiz = getQuiz(getQuizBytes())
+		}
+
 		// load previous scores
 		scores, fileContent := getAscendingScoresFromFile(fileName)
 
@@ -176,7 +182,7 @@ func doQuiz(questions []Question) int {
 		sort.Strings(correctAnswers)
 		sort.Strings(userAnswers)
 
-		fmt.Println("Correct Answer: ", correctAnswers)
+		fmt.Println("Correct Answer:", correctAnswers)
 
 		correctAnswer := true
 		for j, ca := range correctAnswers {
@@ -234,7 +240,7 @@ func placeUser(score int, scores []int) {
 
 	scores = append(scores, score)
 
-	percentile := (float64(pos) / float64(len(scores))) * 100
+	percentile := 100 - (float64(pos)/float64(len(scores)))*100
 
 	// round down to the nearest 5
 	percentile = percentile - (math.Mod(percentile, 5))
@@ -251,4 +257,20 @@ func saveResult(fileContent string, score int) {
 	if err != nil {
 		fmt.Printf("Could not save score - %v", err)
 	}
+}
+
+func hasMultipleAnswers(q []Question) bool {
+	for _, question := range q {
+		b, err := strconv.ParseBool(question.MultipleCorrectAnswers)
+
+		if err != nil {
+			fmt.Printf("Could not check if question had multiple answers - %v", err)
+		}
+
+		if b {
+			return true
+		}
+	}
+
+	return false
 }
