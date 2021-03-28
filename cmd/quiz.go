@@ -71,6 +71,9 @@ var quizCmd = &cobra.Command{
 		// load previous scores
 		scores, fileContent := getAscendingScoresFromFile(fileName)
 
+		// welcome user
+		welcome()
+
 		// start the quiz
 		score := doQuiz(quiz)
 
@@ -274,4 +277,14 @@ func hasMultipleAnswers(q []Question) bool {
 	}
 
 	return false
+}
+
+func welcome() {
+	fmt.Println("Welcome to the quiz!")
+	fmt.Println("You will be asked a number of questions.")
+	fmt.Println("Simply enter the letter which corresponds to your answer.")
+	fmt.Println("< Press ENTER to continue >")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
 }
