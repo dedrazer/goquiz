@@ -232,16 +232,11 @@ func getAscendingScoresFromFile(fileName string) ([]int, string) {
 }
 
 func placeUser(score int, ascendingScores []int) {
-	pos := -1
+	pos := 0
 	for i, s := range ascendingScores {
-		if pos == -1 && s >= score {
+		if s <= score {
 			pos = i
 		}
-	}
-
-	// user placed last
-	if pos == -1 {
-		pos = 0
 	}
 
 	// position + 1 due to 0-based index
@@ -254,7 +249,7 @@ func placeUser(score int, ascendingScores []int) {
 		percentile += 5
 	}
 
-	fmt.Printf("You placed in the top %v%%", percentile)
+	fmt.Printf("You got %v answer(s) correct and placed in the top %v%%", score, percentile)
 }
 
 func saveResult(fileContent string, score int) {
