@@ -61,6 +61,7 @@ var quizCmd = &cobra.Command{
 		// get a quiz from API
 		quiz := getQuiz(getQuizBytes())
 
+		// ensure singular answers
 		for hasMultipleAnswers(quiz) {
 			// if quiz has multiple answers get another
 			// (the vast majority of questions have only 1 answer)
@@ -218,7 +219,7 @@ func getAscendingScoresFromFile(fileName string) ([]int, string) {
 		scores[i], err = strconv.Atoi(strings.Trim(s, " "))
 
 		if err != nil {
-			fmt.Printf("Could not convert score string to int - ", err)
+			fmt.Printf("Could not convert score string to int - %v", err)
 		}
 	}
 
