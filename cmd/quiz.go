@@ -242,9 +242,8 @@ func placeUser(score int, scores []int) {
 		pos = 0
 	}
 
-	scores = append(scores, score)
-
-	percentile := 100 - (float64(pos)/float64(len(scores)))*100
+	// position + 1 due to 0-based index
+	percentile := (float64(pos+1) / float64(len(scores))) * 100
 
 	// round down to the nearest 5
 	percentile = percentile - (math.Mod(percentile, 5))
