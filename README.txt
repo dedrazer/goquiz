@@ -1,5 +1,5 @@
 - Running the program -
-To run the program use the command "go run main.go"
+To run the program use the command "go run main.go quiz"
 
 - Inputting an answer -
 Enter the letter corresponding to the desired answer
