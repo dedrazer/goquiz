@@ -110,6 +110,7 @@ func getQuizBytes() []byte {
 func getQuiz(qb []byte) []Question {
 	quiz := []Question{}
 
+	// convert json bytes to array of questions
 	if err := json.Unmarshal(qb, &quiz); err != nil {
 		log.Printf("Could not unmarshal JSON - %v", err)
 	}
@@ -117,6 +118,7 @@ func getQuiz(qb []byte) []Question {
 	return quiz
 }
 
+// this method supports multiple correct answers
 func doQuiz(questions []Question) int {
 	var result = make([]bool, len(questions))
 	score := 0
@@ -183,11 +185,13 @@ func doQuiz(questions []Question) int {
 			break
 		}
 
+		// order user answers and correct answers
 		sort.Strings(correctAnswers)
 		sort.Strings(userAnswers)
 
 		fmt.Println("Correct Answer:", correctAnswers)
 
+		// compare user answer with correct answer
 		correctAnswer := true
 		for j, ca := range correctAnswers {
 			if userAnswers[j] != ca {
@@ -226,6 +230,7 @@ func getAscendingScoresFromFile(fileName string) ([]int, string) {
 		}
 	}
 
+	// put scores in ascending order
 	sort.Ints(scores)
 
 	return scores, scoresString
@@ -268,6 +273,7 @@ func hasMultipleAnswers(q []Question) bool {
 		}
 
 		if b {
+			// a question has multiple answers
 			return true
 		}
 	}
